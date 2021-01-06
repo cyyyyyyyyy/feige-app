@@ -1,0 +1,36 @@
+{
+  "user": {},
+  "count": 0,
+  "apps": [
+    {
+      "id": "f9fe49c2-99a1-43c8-8cb2-9d2406ff63c0",
+      "name": "铭天家居专营店",
+      "unreadCount": 0,
+      "index": 0
+    },
+    {
+      "id": "bea29483-8780-48a7-904a-def5e703fef6",
+      "name": "",
+      "unreadCount": 0,
+      "index": 1
+    },
+    {
+      "id": "958c59e6-7133-480a-88a7-fcb9f7fc52a2",
+      "name": "",
+      "unreadCount": 0,
+      "index": 2
+    },
+    {
+      "id": "fc4a1ec6-fd3c-498f-b42c-86c8f4603704",
+      "name": "",
+      "unreadCount": 0,
+      "index": 3
+    },
+    {
+      "id": "7cede7cf-f7fe-4c86-98b0-75443e29b214",
+      "name": "",
+      "unreadCount": 0,
+      "index": 4
+    }
+  ]
+}
