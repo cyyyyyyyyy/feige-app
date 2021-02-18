@@ -10,6 +10,31 @@ const Main = () => {
   const [select, setSelect] = useState('');
   const [notif, setNotif] = useState([]);
   const [edit, setEdit] = useState(false);
+  const itemEls = apps.map(() => React.createRef());
+
+  useEffect(() => {
+    if (itemEls) {
+      itemEls.map(view => {
+        if (view.current) {
+          view.current.addEventListener('ipc-message', event => {
+            const data = { ...event.args[0], id: event.target.id };
+            ipcRenderer.send(event.channel, data);
+          });
+        }
+        return null;
+      });
+    }
+    return () => {
+      if (itemEls) {
+        itemEls.map(view => {
+          if (view.current) {
+            view.current.removeAllListeners('ipc-message');
+          }
+          return null;
+        });
+      }
+    };
+  }, [itemEls]);
 
   const getApps = () => {
     ipcRenderer.invoke('get-apps').then(({ data }) => {
@@ -37,7 +62,6 @@ const Main = () => {
 
   const selectApp = id => {
     setSelect(id);
-    // document.getElementById(id).openDevTools();
     const newNotif = notif.filter(val => val.id !== id);
     setNotif(newNotif);
   };
@@ -63,6 +87,10 @@ const Main = () => {
     };
   }, [notif, select]);
 
+  const handleDev = id => {
+    document.getElementById(id).openDevTools();
+  };
+
   return (
     <div className={style.main}>
       <div className={style.box}>
@@ -79,7 +107,12 @@ const Main = () => {
                   <span>{app.name ? app.name : '未登录'}</span>
                 </div>
                 {edit ? (
-                  <div onClick={() => deleteApp(app.id)}>删除</div>
+                  <div style={{ fontSize: '12px' }}>
+                    <span style={{ paddingRight: 4 }} onClick={() => handleDev(app.id)}>
+                      调试
+                    </span>
+                    <span onClick={() => deleteApp(app.id)}>删除</span>
+                  </div>
                 ) : (
                   <div>
                     {noti && noti.unreadConv > 0 ? <span className={style.unread}>{noti.unreadConv}</span> : null}
@@ -95,29 +128,30 @@ const Main = () => {
         </ul>
       </div>
       <ul className={style.views}>
-        {apps.map(app => {
-          return (
-            <li
-              key={app.index}
-              style={{ visibility: select === app.id ? 'visible' : 'hidden' }}
-              className={style['red-bg']}>
-              <webview
-                useragent={`Mozilla/5.0 (Macintosh; Intel Mac OS X 11_0_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.88 Safari/537.36&&${app.id}`}
-                // eslint-disable-next-line no-undef
-                // preload={`file://${path.join(__static, './index.js')}`}
-                preload="../static/index.js"
-                partition={`persist:${app.id}`}
-                id={app.id}
-                style={{ height: '100%', width: '100%' }}
-                src={
-                  app.name
-                    ? 'https://im.jinritemai.com/pc_seller/'
-                    : 'https://fxg.jinritemai.com/index.html#/ffa/penalty/healthCenter'
-                }
-              />
-            </li>
-          );
-        })}
+        {apps.length > 0 &&
+          apps.map((app, index) => {
+            return (
+              <li
+                key={app.index}
+                style={{ visibility: select === app.id ? 'visible' : 'hidden' }}
+                className={style['red-bg']}>
+                <webview
+                  ref={itemEls[index]}
+                  useragent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.83 Safari/537.36"
+                  // preload={`file://${path.join(__static, './index.js')}`}
+                  preload="../static/index.js"
+                  partition={`persist:${app.id}`}
+                  id={app.id}
+                  style={{ height: '100%', width: '100%' }}
+                  src={
+                    app.name
+                      ? 'https://im.jinritemai.com/pc_seller/'
+                      : 'https://fxg.jinritemai.com/index.html#/ffa/penalty/healthCenter'
+                  }
+                />
+              </li>
+            );
+          })}
       </ul>
     </div>
   );
