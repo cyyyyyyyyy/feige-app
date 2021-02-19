@@ -1,6 +1,6 @@
 {
   "name": "feige-app",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "",
   "main": "./electron/main.js",
   "homepage": ".",
@@ -43,6 +43,7 @@
   },
   "license": "ISC",
   "dependencies": {
+    "ahooks": "^2.9.6",
     "electron-context-menu": "^2.3.0",
     "lowdb": "^1.0.0",
     "react": "^17.0.1",

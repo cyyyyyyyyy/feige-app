@@ -7,7 +7,6 @@ const FileSync = require('lowdb/adapters/FileSync');
 const createAppWindow = require('./create-app-window');
 const contextMenu = require('./context-menu');
 const AppDb = require('./app-db');
-const dy = require('./dycode');
 
 const STORE_PATH = app.getPath('userData');
 
@@ -19,10 +18,8 @@ const dbPath = path.join(STORE_PATH, `/lowdb.json`);
 const adapter = new FileSync(dbPath);
 const db = new AppDb(low(adapter));
 
-let mainWindow = null;
-
 app.on('ready', () => {
-  mainWindow = createAppWindow();
+  createAppWindow();
 });
 
 app.on('web-contents-created', (e, contents) => {
@@ -59,19 +56,11 @@ ipcMain.handle('delete-app', async (event, id) => {
   }
 });
 
-ipcMain.on('load-name', async (event, value) => {
-  db.updateApp(value.id, { name: value.name });
-  mainWindow.webContents.send('app-load-name');
-});
-
-ipcMain.on('socket-message', (event, arg) => {
-  const { id, data, unreadConv } = arg;
+ipcMain.handle('load-name', async (event, value) => {
   try {
-    const res = JSON.parse(`${dy.decode(data)}`);
-    if (res.payload.body && res.payload.body.has_new_message_notify) {
-      mainWindow.webContents.send('app-notification', { id, unreadConv });
-    }
+    db.updateApp(value.id, { name: value.name });
+    return { status: 0 };
   } catch (e) {
-    console.error(e);
+    return { status: -1 };
   }
 });

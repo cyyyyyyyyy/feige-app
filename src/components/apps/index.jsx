@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
+import { useWebSocket } from 'ahooks';
 
 import style from './index.less';
 
 const { ipcRenderer } = window.require('electron');
-const path = window.require('path');
+const { session } = window.require('electron').remote;
 
 const Main = () => {
   const [apps, setApps] = useState([]);
@@ -12,30 +13,6 @@ const Main = () => {
   const [edit, setEdit] = useState(false);
   const itemEls = apps.map(() => React.createRef());
 
-  useEffect(() => {
-    if (itemEls) {
-      itemEls.map(view => {
-        if (view.current) {
-          view.current.addEventListener('ipc-message', event => {
-            const data = { ...event.args[0], id: event.target.id };
-            ipcRenderer.send(event.channel, data);
-          });
-        }
-        return null;
-      });
-    }
-    return () => {
-      if (itemEls) {
-        itemEls.map(view => {
-          if (view.current) {
-            view.current.removeAllListeners('ipc-message');
-          }
-          return null;
-        });
-      }
-    };
-  }, [itemEls]);
-
   const getApps = () => {
     ipcRenderer.invoke('get-apps').then(({ data }) => {
       if (data) {
@@ -43,6 +20,78 @@ const Main = () => {
       }
     });
   };
+
+  const handleMessage = message => {
+    const { type, data } = message;
+    const { user, shopName, messageNum } = data;
+    switch (type) {
+      case 'connect':
+        break;
+      case 'newMsg':
+        if (!notif.find(val => val.id === user) && user !== select) {
+          setNotif([...notif, { id: user, unreadConv: messageNum }]);
+        }
+        break;
+      case 'shopName':
+        ipcRenderer.invoke('load-name', { id: user, name: shopName }).then(() => {
+          getApps();
+        });
+        break;
+      default:
+        break;
+    }
+  };
+
+  const { sendMessage } = useWebSocket('ws://niulixin.natapp1.cc:15673/feige/websocket', {
+    onMessage: message => {
+      const { data } = message;
+      try {
+        const paserData = JSON.parse(data);
+        handleMessage(paserData);
+      } catch (e) {
+        console.error(e);
+      }
+    }
+  });
+
+  useEffect(() => {
+    if (itemEls) {
+      itemEls.forEach(view => {
+        if (view.current) {
+          view.current.addEventListener('did-navigate', ({ url }) => {
+            if (view.current && view.current.partition && url.indexOf('pc_seller') !== -1) {
+              session
+                .fromPartition(view.current.partition)
+                .cookies.get({ url })
+                .then(cookies => {
+                  const data = {};
+                  if (cookies) {
+                    cookies.forEach(val => {
+                      data[val.name] = val.value;
+                    });
+                  }
+                  sendMessage(
+                    JSON.stringify({
+                      user: view.current.id,
+                      cookie: data
+                    })
+                  );
+                });
+            }
+          });
+        }
+      });
+    }
+    return () => {
+      if (itemEls) {
+        itemEls.forEach(view => {
+          if (view.current) {
+            view.current.removeAllListeners('did-navigate');
+          }
+        });
+      }
+    };
+  }, [itemEls, select]);
 
   const addApp = () => {
     ipcRenderer.invoke('add-app', '').then(data => {
@@ -69,23 +118,6 @@ const Main = () => {
   useEffect(() => {
     getApps();
   }, []);
-
-  useEffect(() => {
-    ipcRenderer.on('app-load-name', () => {
-      getApps();
-    });
-  }, []);
-
-  useEffect(() => {
-    ipcRenderer.on('app-notification', (event, { id, unreadConv }) => {
-      if (!notif.find(val => val.id === id) && id !== select) {
-        setNotif([...notif, { id, unreadConv }]);
-      }
-    });
-    return () => {
-      ipcRenderer.removeAllListeners('app-notification');
-    };
-  }, [notif, select]);
 
   const handleDev = id => {
     document.getElementById(id).openDevTools();
@@ -138,8 +170,6 @@ const Main = () => {
                 <webview
                   ref={itemEls[index]}
                   useragent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.83 Safari/537.36"
-                  // preload={`file://${path.join(__static, './index.js')}`}
-                  preload="../static/index.js"
                   partition={`persist:${app.id}`}
                   id={app.id}
                   style={{ height: '100%', width: '100%' }}

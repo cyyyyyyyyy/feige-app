@@ -12,11 +12,13 @@ const createAppWindow = () => {
       webviewTag: true
     }
   });
+
   if (process.env.NODE_ENV === 'development') {
     appMainWindow.webContents.loadURL('http://localhost:9001');
   } else {
     appMainWindow.webContents.loadFile(path.join(__dirname, '../dist/index.html'));
   }
+
   contextMenu(appMainWindow);
   return appMainWindow;
 };
