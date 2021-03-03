@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import { useWebSocket } from 'ahooks';
 
 import style from './index.less';
 
@@ -21,45 +20,16 @@ const Main = () => {
     });
   };
 
-  const handleMessage = message => {
-    const { type, data } = message;
-    const { user, shopName, messageNum } = data;
-    switch (type) {
-      case 'connect':
-        break;
-      case 'newMsg':
-        if (!notif.find(val => val.id === user) && user !== select) {
-          setNotif([...notif, { id: user, unreadConv: messageNum }]);
-        }
-        break;
-      case 'shopName':
-        ipcRenderer.invoke('load-name', { id: user, name: shopName }).then(() => {
-          getApps();
-        });
-        break;
-      default:
-        break;
-    }
-  };
-
-  const { sendMessage } = useWebSocket('ws://niulixin.natapp1.cc:15673/feige/websocket', {
-    onMessage: message => {
-      const { data } = message;
-      try {
-        const paserData = JSON.parse(data);
-        handleMessage(paserData);
-      } catch (e) {
-        console.error(e);
-      }
-    }
-  });
-
   useEffect(() => {
     if (itemEls) {
       itemEls.forEach(view => {
         if (view.current) {
           view.current.addEventListener('did-navigate', ({ url }) => {
-            if (view.current && view.current.partition && url.indexOf('pc_seller') !== -1) {
+            if (
+              view.current &&
+              view.current.partition &&
+              url.indexOf('pc_seller') !== -1
+            ) {
               session
                 .fromPartition(view.current.partition)
                 .cookies.get({ url })
@@ -69,13 +39,12 @@ const Main = () => {
                     cookies.forEach(val => {
                       data[val.name] = val.value;
                     });
+                    ipcRenderer
+                      .invoke('send-cookie', { data, id: view.current.id })
+                      .then(() => {
+                        console.log('12313');
+                      });
                   }
-                  sendMessage(
-                    JSON.stringify({
-                      user: view.current.id,
-                      cookie: data
-                    })
-                  );
                 });
             }
           });
@@ -132,7 +101,9 @@ const Main = () => {
             const isSelect = select === app.id;
             return (
               <li
-                className={`${style.app_list} ${isSelect ? style.select : ''} ${noti ? style.border : ''}`}
+                className={`${style.app_list} ${isSelect ? style.select : ''} ${
+                  noti ? style.border : ''
+                }`}
                 key={app.id}
                 onClick={() => selectApp(app.id)}>
                 <div>
@@ -140,14 +111,18 @@ const Main = () => {
                 </div>
                 {edit ? (
                   <div style={{ fontSize: '12px' }}>
-                    <span style={{ paddingRight: 4 }} onClick={() => handleDev(app.id)}>
+                    <span
+                      style={{ paddingRight: 4 }}
+                      onClick={() => handleDev(app.id)}>
                       调试
                     </span>
                     <span onClick={() => deleteApp(app.id)}>删除</span>
                   </div>
                 ) : (
                   <div>
-                    {noti && noti.unreadConv > 0 ? <span className={style.unread}>{noti.unreadConv}</span> : null}
+                    {noti && noti.unreadConv > 0 ? (
+                      <span className={style.unread}>{noti.unreadConv}</span>
+                    ) : null}
                   </div>
                 )}
               </li>

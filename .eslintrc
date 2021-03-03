@@ -3,6 +3,7 @@
   "plugins": ["prettier"],
   "rules": {
     "prettier/prettier": "error",
+    "camelcase": ["off"],
     "import/no-extraneous-dependencies": ["off"],
     "react/jsx-closing-bracket-location": ["off"],
     "jsx-a11y/click-events-have-key-events": ["off"],
