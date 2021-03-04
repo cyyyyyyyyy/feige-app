@@ -8,8 +8,8 @@ class AppDb {
     return this.db.get('shopes').value();
   }
 
-  getAppByIndex(index) {
-    return this.db.get('shopes').find({ index }).value();
+  getShopByUid(shopUid) {
+    return this.db.get('shopes').find({ shopUid }).value();
   }
 
   // 新增店铺
@@ -19,14 +19,6 @@ class AppDb {
       .get('shopes')
       .push({ ...data, index })
       .write();
-  }
-
-  removeApp(id) {
-    this.db.get('shopes').remove({ id }).write();
-  }
-
-  updateEnt(entId, data) {
-    this.db.get('shopes').find({ entId }).assign(data).write();
   }
 }
 
