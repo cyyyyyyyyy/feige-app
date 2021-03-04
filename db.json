@@ -1,36 +1,21 @@
 {
   "user": {},
   "count": 0,
-  "apps": [
+  "shopes": [
     {
-      "id": "f9fe49c2-99a1-43c8-8cb2-9d2406ff63c0",
-      "name": "铭天家居专营店",
-      "unreadCount": 0,
+      "subToutiaoId": "64146895404",
+      "shopUid": "46450a95-b8cb-44e7-969b-9b875dfac676",
+      "shopName": "铭天家居专营店",
+      "shopLog": "https://sf3-ttcdn-tos.pstatp.com/obj/temai/Foo9DihMhOj0Zt41YNFVw7arWWCTwww400-400",
+      "customerInfo": {
+        "id": "64146895404",
+        "screen_name": "刘宇鹏",
+        "avatar_url": "https://sf3-ttcdn-tos.pstatp.com/obj/temai/Foo9DihMhOj0Zt41YNFVw7arWWCTwww400-400"
+      },
+      "shopId": 155831,
+      "cookies": "gftoken=MTgwMzE2Mzk3MnwxNjE0NzYxNTc2MzZ8fDAGBgYGBgY;Hm_lvt_b6520b076191ab4b36812da4c90f7a5e=1614761577;Hm_lpvt_b6520b076191ab4b36812da4c90f7a5e=1614761577;ttcid=6e0638a83414437fb70a13918cac5cf713;s_v_web_id=verify_klt7cnpw_LNWQC7b8_zv1u_4Yyl_Bi1Q_BSmjcpfvQ8pP;tt_scid=7Q4dwJ64Xb9DKFeQ8tdNQVnFqcZUjmpHt-1PFwNNBtZDuIL9tg0r.U-5GXKAwcT39e37;ttwid=1%7C4RNx-KwuRCdNkbWsX-ZaBdw7eLJvSgok7kB2_M4m-KE%7C1614761577%7C77b210fef5926a0b9013c34565dac703e930f6fdd5b4f045a668dd98253b8f11;passport_csrf_token=9e39b7a96181a7d078dc5ba8702e3856;passport_csrf_token_default=9e39b7a96181a7d078dc5ba8702e3856;MONITOR_WEB_ID=verify_klt7cnpw_LNWQC7b8_zv1u_4Yyl_Bi1Q_BSmjcpfvQ8pP;d_ticket=b3238a5406cf55c26ff40833a51bb97ea7ab8;odin_tt=e6e548bafe3f9bc3a1e5f585b8088d444d204b3dd25f2f4551c7907753464a0a7453bae8fe36d1cf8c9f738a1a4af0d3;n_mh=xZgRkVIr5ZJ1v_aUpSDlX0_iHPlUZwhKfy05OGFUb_w;passport_auth_status=d8b08e602ef897ef4dd79a7f4005d6d8%2C;passport_auth_status_ss=d8b08e602ef897ef4dd79a7f4005d6d8%2C;sid_guard=7181bf7ffce0d5636ce280c41dcfa18e%7C1614761605%7C5184000%7CSun%2C+02-May-2021+08%3A53%3A25+GMT;uid_tt=1ce93821dca8fc0043a6ba7af3c297b6;uid_tt_ss=1ce93821dca8fc0043a6ba7af3c297b6;sid_tt=7181bf7ffce0d5636ce280c41dcfa18e;sessionid=7181bf7ffce0d5636ce280c41dcfa18e;sessionid_ss=7181bf7ffce0d5636ce280c41dcfa18e;need_choose_shop=0;PHPSESSID=e210594dc07ed38478c4e6cab1c21ca4;PHPSESSID_SS=e210594dc07ed38478c4e6cab1c21ca4;",
+      "token": "5l8beb2vytRnquWmdzOCyXiyLUO2CIbFchNgrM4I05vE6p4JbN9pAQ",
       "index": 0
-    },
-    {
-      "id": "bea29483-8780-48a7-904a-def5e703fef6",
-      "name": "",
-      "unreadCount": 0,
-      "index": 1
-    },
-    {
-      "id": "958c59e6-7133-480a-88a7-fcb9f7fc52a2",
-      "name": "",
-      "unreadCount": 0,
-      "index": 2
-    },
-    {
-      "id": "fc4a1ec6-fd3c-498f-b42c-86c8f4603704",
-      "name": "",
-      "unreadCount": 0,
-      "index": 3
-    },
-    {
-      "id": "7cede7cf-f7fe-4c86-98b0-75443e29b214",
-      "name": "",
-      "unreadCount": 0,
-      "index": 4
     }
   ]
 }

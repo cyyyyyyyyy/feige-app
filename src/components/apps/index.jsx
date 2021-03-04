@@ -9,7 +9,7 @@ const Main = () => {
   const [apps, setApps] = useState([]);
   const [select, setSelect] = useState('');
   const [notif, setNotif] = useState([]);
-  const [edit, setEdit] = useState(false);
+  const [id, setEdit] = useState(false);
   const itemEls = apps.map(() => React.createRef());
 
   const getApps = () => {
@@ -147,7 +147,7 @@ const Main = () => {
                   useragent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.83 Safari/537.36"
                   partition={`persist:${app.id}`}
                   id={app.id}
-                  style={{ height: '100%', width: '100%' }}
+                  style={{ height: '100%', width: '100%', overflow: 'hidden' }}
                   src={
                     app.name
                       ? 'https://im.jinritemai.com/pc_seller/'

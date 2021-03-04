@@ -1,9 +1,19 @@
 import React from 'react';
+import { ConfigProvider } from 'antd';
+import { Provider } from 'react-redux';
+import zhCN from 'antd/lib/locale/zh_CN';
 
-import Apps from './components/apps';
+import store from './store';
+import Home from './pages/home';
 
 const Main = () => {
-  return <Apps />;
+  return (
+    <Provider store={store}>
+      <ConfigProvider locale={zhCN}>
+        <Home />
+      </ConfigProvider>
+    </Provider>
+  );
 };
 
 export default Main;

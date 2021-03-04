@@ -1,51 +1,43 @@
 const request = require('request');
+const queryString = require('query-string');
 
 const UA = require('../constants/ua');
 
-class HttpSpider {
-  constructor(cookie) {
-    this.headers = {
-      'accept-language': 'en-US',
-      Connection: 'keep-alive',
-      accept: 'application/json, text/plain, */*',
-      'User-Agent': UA,
-      'sec-fetch-dest': 'empty',
-      'sec-fetch-mode': 'cors',
-      'sec-fetch-site': 'same-site',
-      referrer:
-        'https://im.jinritemai.com/pc_seller/main/chat?selfId=64146895404',
-      referrerPolicy: 'no-referrer-when-downgrade',
-      Cookie: cookie // 如果携带了cookie
-    };
+const baseHeader = {
+  'accept-language': 'en-US',
+  Connection: 'keep-alive',
+  accept: 'application/json, text/plain, */*',
+  'content-type': 'application/json;charset=UTF-8',
+  'User-Agent': UA,
+  'sec-fetch-dest': 'empty',
+  'sec-fetch-mode': 'cors',
+  'sec-fetch-site': 'same-site',
+  referrer: 'https://im.jinritemai.com/pc_seller/main/chat?selfId=64146895404',
+  referrerPolicy: 'no-referrer-when-downgrade'
+};
 
-    this.postHeader = {
-      authority: 'pigeon.jinritemai.com',
-      origin: 'https://im.jinritemai.com',
-      accept: 'application/json, text/plain, */*',
-      'content-type': 'application/json;charset=UTF-8',
-      'User-Agent': UA,
-      'sec-fetch-dest': 'empty',
-      'sec-fetch-mode': 'cors',
-      'sec-fetch-site': 'same-site',
-      referrer:
-        'https://im.jinritemai.com/pc_seller/main/chat?selfId=64146895404',
-      referrerPolicy: 'no-referrer-when-downgrade',
-      Cookie: cookie
-    };
+class HttpSpider {
+  constructor() {
+    this.cookies = {};
   }
 
-  get({ url }) {
-    return new Promise((resolve, reject) => {
-      const queryParams = new URLSearchParams(url);
-      queryParams.set('_ts', new Date().getTime());
-      queryParams.set('biz_type', '4');
-      const setUrl = decodeURIComponent(queryParams.toString());
+  // 用于存储企业id所对应cookie
+  setCookie(shopUid, cookie) {
+    this.cookies[shopUid] = cookie;
+  }
 
+  get({ shopUid, url }) {
+    return new Promise((resolve, reject) => {
+      const paramUrl = queryString.stringifyUrl({
+        url,
+        query: { _ts: new Date().getTime(), biz_type: '4' }
+      });
+      const headers = { ...baseHeader, Cookie: this.cookies[shopUid] };
       request(
         {
-          url: setUrl, // 你要请求的地址
+          url: paramUrl,
           method: 'get',
-          headers: this.headers
+          headers
         },
         (error, response, body) => {
           const data = JSON.parse(body);
@@ -58,17 +50,19 @@ class HttpSpider {
     });
   }
 
-  post({ url, body }) {
+  post({ shopUid, url, body }) {
     return new Promise((resolve, reject) => {
-      const queryParams = new URLSearchParams(url);
-      queryParams.set('_ts', new Date().getTime());
-      queryParams.set('biz_type', '4');
-      const setUrl = decodeURIComponent(queryParams.toString());
+      const paramUrl = queryString.stringifyUrl({
+        url,
+        query: { _ts: new Date().getTime(), biz_type: '4' }
+      });
+      const headers = { ...baseHeader, Cookie: this.cookies[shopUid] };
+
       request(
         {
-          url: setUrl, // 你要请求的地址
+          url: paramUrl, // 你要请求的地址
           method: 'post',
-          headers: this.postHeader,
+          headers,
           body: JSON.stringify(body)
         },
         (error, response, resBody) => {

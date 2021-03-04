@@ -1,30 +1,32 @@
-const { v4: uuidv4 } = require('uuid');
-
 class AppDb {
   constructor(db) {
     this.db = db;
-    db.defaults({ apps: [] }).write();
+    db.defaults({ shopes: [] }).write();
   }
 
-  getApps() {
-    return this.db.get('apps').value();
+  getShopes() {
+    return this.db.get('shopes').value();
   }
 
   getAppByIndex(index) {
-    return this.db.get('apps').find({ index }).value();
+    return this.db.get('shopes').find({ index }).value();
   }
 
-  addApp() {
-    const index = this.db.get('apps').value().length;
-    this.db.get('apps').push({ id: uuidv4(), name: '', unreadCount: 0, index }).write();
+  // 新增店铺
+  addShop(data) {
+    const index = this.db.get('shopes').value().length;
+    this.db
+      .get('shopes')
+      .push({ ...data, index })
+      .write();
   }
 
   removeApp(id) {
-    this.db.get('apps').remove({ id }).write();
+    this.db.get('shopes').remove({ id }).write();
   }
 
-  updateApp(id, data) {
-    this.db.get('apps').find({ id }).assign(data).write();
+  updateEnt(entId, data) {
+    this.db.get('shopes').find({ entId }).assign(data).write();
   }
 }
 

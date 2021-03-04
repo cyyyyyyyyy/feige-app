@@ -15,12 +15,21 @@ const contextMenu = window => {
         click() {
           window.goBack();
         }
+      },
+      {
+        label: '控制台',
+        click() {
+          window.openDevTools();
+        }
       }
     ];
-    if (params.editFlags.canCopy) menuTmpl.push({ label: '复制', role: 'copy' });
+    if (params.editFlags.canCopy)
+      menuTmpl.push({ label: '复制', role: 'copy' });
     if (params.editFlags.canCut) menuTmpl.push({ label: '剪切', role: 'cut' });
-    if (params.editFlags.canPaste) menuTmpl.push({ label: '粘贴', role: 'paste' });
-    if (params.editFlags.canDelete) menuTmpl.push({ label: '删除', role: 'delete' });
+    if (params.editFlags.canPaste)
+      menuTmpl.push({ label: '粘贴', role: 'paste' });
+    if (params.editFlags.canDelete)
+      menuTmpl.push({ label: '删除', role: 'delete' });
 
     if (params.linkURL) {
       menuTmpl.push({
