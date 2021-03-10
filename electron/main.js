@@ -147,6 +147,13 @@ ipcMain.handle('shop-ws-connect', async (event, payload) => {
     shopUid,
     success: () => {
       return { code: 0, message: '连接成功' };
+    },
+    onMessage: () => {
+      // 发送新消息
+      ipcMain.handleOnce('new-message', {});
+
+      // 结束对话
+      ipcMain.handleOnce('end-conv', {});
     }
   });
 });

@@ -3,10 +3,10 @@ const btoa = require('btoa');
 
 const dy = require('../lib/dycode');
 const uuid = require('../utils/uuid');
+const ua = require('../constants/ua');
 
 const headers = {
-  user_agent:
-    'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.83 Safari/537.36',
+  user_agent: ua,
   cookie_enabled: 'true',
   browser_language: 'zh-CN',
   browser_platform: 'Win64',
@@ -29,7 +29,7 @@ class WsSpider {
     this.db = db;
   }
 
-  connect({ shopUid, success, erorr }) {
+  connect({ shopUid, success, erorr, onMessage }) {
     if (!this.shopes[shopUid]) {
       const shop = this.db.getShopByUid(shopUid);
       this.shopes[shopUid] = {
@@ -47,14 +47,20 @@ class WsSpider {
       });
 
       ws.on('message', mesage => {
+        let msgObj;
         try {
-          const { userId, token, sendMessage } = this.shopes[shopUid];
           const str = String.fromCharCode(...new Uint8Array(mesage));
           const str2 = btoa(str);
           const decodeStr = dy.decode(str2);
-          const msgObj = JSON.parse(decodeStr);
+          msgObj = JSON.parse(decodeStr);
+        } catch (e) {
+          console.error('消息解析失败');
+        }
 
-          if (msgObj.payload.cmd === 609) {
+        // 发送消息
+        try {
+          const { userId, token, sendMessage } = this.shopes[shopUid];
+          if (msgObj && msgObj.payload.cmd === 609) {
             const {
               create_conversation_v2_body: sendData
             } = msgObj.payload.body;
@@ -79,7 +85,6 @@ class WsSpider {
                   message_type: 1000,
                   ext: {
                     receiver_id: userId,
-                    // shop_id: this.sendMsgData.shopId,
                     src: 'pc',
                     source: '',
                     type: 'text',
@@ -105,9 +110,28 @@ class WsSpider {
             const sendDataCode = dy.encode(secendSendData);
             const myBuffer = Buffer.from(sendDataCode, 'base64');
             ws.send(myBuffer);
+            this.shopes[shopUid].sendMessage = '';
+            this.shopes[shopUid].userId = '';
           }
         } catch (e) {
           console.error(e);
+        }
+
+        // 新消息提醒以及对话结束
+        try {
+          if (msgObj && msgObj.payload.cmd === 500) {
+            const { message } = msgObj.payload.body.has_new_message_notify;
+            const { ext, content } = message;
+            const { o_sender, receiver_id } = ext;
+            onMessage({
+              senderId: o_sender,
+              receiverId: receiver_id,
+              shopUid,
+              content
+            });
+          }
+        } catch (e) {
+          console.error('新消息提醒失败');
         }
       });
 
