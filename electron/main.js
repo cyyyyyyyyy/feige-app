@@ -122,8 +122,8 @@ ipcMain.handle('get-shopes', async () => {
 
 ipcMain.handle('delete-shope', async (event, shopUid) => {
   try {
-    wsSpider.closeWs({ shopUid });
     db.deleteShop({ shopUid });
+    wsSpider.closeWs({ shopUid });
     return { code: 0 };
   } catch (e) {
     return { code: -1 };
@@ -184,11 +184,17 @@ ipcMain.handle('shop-ws-connect', async (event, payload) => {
       wsSpider.connect({
         shopUid,
         success: () => {
-          resolve({ code: 0, message: '连接成功' });
+          resolve({ code: 0, message: '连接成功', shopUid });
         },
         onMessage: data => {
           // 发送新消息
           mainWindow.webContents.send('new-message', data);
+        },
+        onClose: data => {
+          mainWindow.webContents.send('socket-close', data);
+        },
+        onError: data => {
+          mainWindow.webContents.send('socket-error', data);
         }
       });
     });

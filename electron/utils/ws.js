@@ -46,12 +46,10 @@ class Ws {
     this.ws.on('message', val => {
       // 进行加解密
       try {
-        console.log(this.sendMsgData.shopId);
         const str = String.fromCharCode(...new Uint8Array(val));
         const str2 = btoa(str);
         const decodeStr = dy.decode(str2);
         const msgObj = JSON.parse(decodeStr);
-        console.log(msgObj);
         // 判断为发消息验证请求，模拟一条消息发送出去。
         if (msgObj.payload.cmd === 609) {
           const { create_conversation_v2_body: sendData } = msgObj.payload.body;

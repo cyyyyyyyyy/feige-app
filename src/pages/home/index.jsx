@@ -60,10 +60,8 @@ const Home = () => {
   };
 
   const handleDeleteShop = value => {
-    ipcRenderer.invoke('delete-shope', value).then(res => {
-      if (res.code === 0) {
-        handleGetShopes();
-      }
+    ipcRenderer.invoke('delete-shope', value).then(() => {
+      handleGetShopes();
     });
   };
 
@@ -128,12 +126,27 @@ const Home = () => {
   }, [onlineShopes, connectShop]);
 
   useEffect(() => {
+    ipcRenderer.on('socket-close', (event, arg) => {
+      const filter = connectShop.filter(val => val !== arg.shopUid);
+      setConnectShop(filter);
+    });
+
+    ipcRenderer.on('socket-error', (event, arg) => {
+      const filter = connectShop.filter(val => val !== arg.shopUid);
+      setConnectShop(filter);
+    });
+    return () => {
+      ipcRenderer.removeAllListeners(['socket-error', 'socket-close']);
+    };
+  }, [connectShop]);
+
+  useEffect(() => {
     if (viewRef && viewRef.current) {
       viewRef.current.addEventListener('did-navigate', ({ url }) => {
         if (
           viewRef.current &&
           viewRef.current.partition &&
-          url.indexOf('index.html') !== -1
+          url !== 'https://fxg.jinritemai.com/login'
         ) {
           session
             .fromPartition(viewRef.current.partition)
@@ -160,7 +173,8 @@ const Home = () => {
     openCreateModal,
     quickReply,
     handleUpdateQuickReply,
-    handleDeleteShop
+    handleDeleteShop,
+    handleConnetShop
   };
 
   return (
@@ -186,7 +200,7 @@ const Home = () => {
           <Convs data={propsData} />
         )}
         <Modal
-          width={800}
+          width={1200}
           visible={visible}
           footer={null}
           onCancel={closeCreateModal}

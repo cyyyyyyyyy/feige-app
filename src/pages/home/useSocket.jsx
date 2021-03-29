@@ -46,16 +46,19 @@ const useSocket = (onlineShopes, connectShop, quickReply) => {
     const shopes = onlineShopes.filter(
       val => connectShop.indexOf(val.shopUid) === -1
     );
-    shopes.forEach(({ shopUid }) => {
-      ipcRenderer
-        .invoke('shop-ws-connect', {
-          shopUid
-        })
-        .then(data => {
-          if (data.code === 0) {
-            setNewConnectShop([...newConnectShop, shopUid]);
-          }
-        });
+
+    const shopesPromise = shopes.map(({ shopUid }) => {
+      return ipcRenderer.invoke('shop-ws-connect', {
+        shopUid
+      });
+    });
+
+    Promise.all(shopesPromise).then(values => {
+      let shopesData = [];
+      if (values) {
+        shopesData = values.map(val => val.shopUid);
+      }
+      setNewConnectShop(shopesData);
     });
   };
 

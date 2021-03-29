@@ -12,7 +12,8 @@ const Setting = ({ data }) => {
     openCreateModal,
     handleUpdateQuickReply,
     handleDeleteShop,
-    quickReply
+    quickReply,
+    handleConnetShop
   } = data;
   const [form] = Form.useForm();
   const [visible, setVisible] = useState(false);
@@ -85,6 +86,13 @@ const Setting = ({ data }) => {
           onClick={() => setVisible(true)}
           type="primary">
           编辑自动回复话术
+        </Button>
+        <Button
+          o
+          style={{ marginLeft: 8 }}
+          onClick={handleConnetShop}
+          type="primary">
+          重连
         </Button>
       </div>
       <Table

@@ -29,9 +29,9 @@ class WsSpider {
     this.db = db;
   }
 
-  connect({ shopUid, success, erorr, onMessage }) {
-    if (!this.shopes[shopUid]) {
-      const shop = this.db.getShopByUid(shopUid);
+  connect({ shopUid, success, onMessage, onClose, onError }) {
+    const shop = this.db.getShopByUid(shopUid);
+    if (!this.shopes[shopUid] && shop) {
       this.shopes[shopUid] = {
         token: shop.token,
         customerId: shop.customerInfo.id
@@ -139,12 +139,12 @@ class WsSpider {
       });
 
       ws.on('close', () => {
-        console.log(`已关闭${shopUid}`);
+        onClose({ shopUid });
         delete this.shopes[shopUid];
       });
 
       ws.on('error', () => {
-        erorr();
+        onError({ shopUid });
         delete this.shopes[shopUid];
       });
     }
@@ -187,7 +187,9 @@ class WsSpider {
 
   closeWs({ shopUid }) {
     const { ws } = this.shopes[shopUid];
-    ws.close();
+    if (ws) {
+      ws.close();
+    }
   }
 }
 

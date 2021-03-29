@@ -1,6 +1,6 @@
 {
   "name": "feige-app",
-  "version": "0.0.9",
+  "version": "0.0.10",
   "description": "",
   "main": "./electron/main.js",
   "homepage": ".",

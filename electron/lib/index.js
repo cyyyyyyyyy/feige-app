@@ -31,6 +31,3 @@ const data = dy.encode({
   device_platform: 'web',
   auth_type: 2
 });
-
-console.log(data);
-console.log(dy.decode(data));
