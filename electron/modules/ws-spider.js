@@ -123,14 +123,16 @@ class WsSpider {
             const { ext, content } = message;
             const { src_user_id, receiver_id, type, auto_welcome_tag } = ext;
             if (receiver_id && src_user_id !== receiver_id) {
-              onMessage({
-                type,
-                customerId: src_user_id,
-                receiverId: receiver_id,
-                shopUid,
-                content,
-                auto_welcome_tag
-              });
+              if (content || type === 'user_enter_time') {
+                onMessage({
+                  type,
+                  customerId: src_user_id,
+                  receiverId: receiver_id,
+                  shopUid,
+                  content,
+                  auto_welcome_tag
+                });
+              }
             }
           }
         } catch (e) {
