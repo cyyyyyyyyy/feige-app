@@ -19,15 +19,11 @@ const useSocket = (onlineShopes, connectShop, quickReply) => {
     const { autoMsgTime } = quickReply;
     if (autoMsgTime) {
       ipcRenderer.on('new-message', (event, arg) => {
-        const { customerId, shopUid, receiverId, auto_welcome_tag } = arg;
+        const { customerId, shopUid, receiverId, role } = arg;
+        clearTimeout(timer[receiverId]);
+        timer[receiverId] = null;
 
-        // 自动回复消息不算。
-        if (auto_welcome_tag !== '1') {
-          clearTimeout(timer[receiverId]);
-          timer[receiverId] = null;
-        }
-
-        if (customerId) {
+        if (customerId && role !== '2') {
           if (!timer[customerId]) {
             timer[customerId] = setTimeout(() => {
               handleSendMessage({ shopUid, id: customerId });

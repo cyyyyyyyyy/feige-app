@@ -120,18 +120,36 @@ class WsSpider {
         try {
           if (msgObj) {
             const { message } = msgObj.payload.body.has_new_message_notify;
-            const { ext, content } = message;
-            const { src_user_id, receiver_id, type, auto_welcome_tag } = ext;
+            const { ext, content, sender_role } = message;
+            const { src_user_id, receiver_id, shop_id, auto_welcome_tag } = ext;
             if (receiver_id && src_user_id !== receiver_id) {
-              if (content || type === 'user_enter_time') {
+              // 客服回复的消息
+              if (sender_role === '2' && content) {
                 onMessage({
-                  type,
                   customerId: src_user_id,
                   receiverId: receiver_id,
                   shopUid,
-                  content,
-                  auto_welcome_tag
+                  rolo: '2'
                 });
+              }
+
+              // 有消息体后发送回复消息
+              if (content && content !== '[客服关闭会话]') {
+                if (auto_welcome_tag !== '1') {
+                  onMessage({
+                    customerId: src_user_id,
+                    receiverId: receiver_id,
+                    shopUid,
+                    content
+                  });
+                } else {
+                  onMessage({
+                    customerId: receiver_id,
+                    receiverId: shop_id,
+                    shopUid,
+                    content
+                  });
+                }
               }
             }
           }
