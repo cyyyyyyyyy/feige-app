@@ -40,10 +40,11 @@ class HttpSpider {
           headers
         },
         (error, response, body) => {
-          const data = JSON.parse(body);
-          resolve(data);
           if (error) {
             reject(error);
+          } else {
+            const data = JSON.parse(body);
+            resolve(data);
           }
         }
       );

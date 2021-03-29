@@ -116,26 +116,30 @@ class WsSpider {
         } catch (e) {
           console.error(e);
         }
-
         // 新消息提醒以及对话结束
         try {
-          if (msgObj && msgObj.payload.cmd === 500) {
+          if (msgObj) {
             const { message } = msgObj.payload.body.has_new_message_notify;
             const { ext, content } = message;
-            const { o_sender, receiver_id } = ext;
-            onMessage({
-              senderId: o_sender,
-              receiverId: receiver_id,
-              shopUid,
-              content
-            });
+            const { src_user_id, receiver_id, type, auto_welcome_tag } = ext;
+            if (receiver_id && src_user_id !== receiver_id) {
+              onMessage({
+                type,
+                customerId: src_user_id,
+                receiverId: receiver_id,
+                shopUid,
+                content,
+                auto_welcome_tag
+              });
+            }
           }
         } catch (e) {
-          console.error('新消息提醒失败');
+          // console.error('新消息提醒失败');
         }
       });
 
       ws.on('close', () => {
+        console.log(`已关闭${shopUid}`);
         delete this.shopes[shopUid];
       });
 
@@ -175,6 +179,15 @@ class WsSpider {
       const myBuffer = Buffer.from(firstSendDataCode, 'base64');
       ws.send(myBuffer);
     }
+  }
+
+  getClientShop() {
+    return this.shopes;
+  }
+
+  closeWs({ shopUid }) {
+    const { ws } = this.shopes[shopUid];
+    ws.close();
   }
 }
 

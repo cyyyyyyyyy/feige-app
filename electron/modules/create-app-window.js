@@ -9,7 +9,9 @@ const createAppWindow = () => {
     webPreferences: {
       nodeIntegration: true,
       contextIsolation: false,
-      webviewTag: true
+      webviewTag: true,
+      enableRemoteModule: true,
+      webSecurity: false
     }
   });
 
@@ -17,7 +19,7 @@ const createAppWindow = () => {
     appMainWindow.webContents.loadURL('http://localhost:9001');
   } else {
     appMainWindow.webContents.loadFile(
-      path.join(__dirname, '../dist/index.html')
+      path.join(__dirname, '../../dist/index.html')
     );
   }
 

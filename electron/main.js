@@ -16,15 +16,16 @@ if (!fs.existsSync(STORE_PATH)) {
   fs.mkdirSync(STORE_PATH);
 }
 
-// const dbPath = path.join(STORE_PATH, `/lowdb.json`);
-const dbPath = path.join('./db.json');
+const dbPath = path.join(STORE_PATH, `/lowdb.json`);
+// const dbPath = path.join('./db.json');
 const adapter = new FileSync(dbPath);
 const db = new AppDb(low(adapter));
 const httpSpider = new HttpSpider();
 const wsSpider = new WsSpider(db);
+let mainWindow;
 
 app.on('ready', () => {
-  createAppWindow();
+  mainWindow = createAppWindow();
 });
 
 app.on('web-contents-created', (e, contents) => {
@@ -34,16 +35,18 @@ app.on('web-contents-created', (e, contents) => {
   });
 });
 
-ipcMain.handle('get-shopes', async () => {
+ipcMain.handle('get-quick-reply', async () => {
   try {
-    const data = db.getShopes();
+    const data = db.getQuickReply();
+    return { code: 0, data };
+  } catch (e) {
+    return { code: -1 };
+  }
+});
 
-    if (data && data.length > 0) {
-      data.forEach(shop => {
-        httpSpider.setCookie(shop.shopUid, shop.cookies);
-      });
-    }
-
+ipcMain.handle('update-quick-reply', async (event, payload) => {
+  try {
+    const data = db.updateQuickReply(payload);
     return { code: 0, data };
   } catch (e) {
     return { code: -1 };
@@ -101,8 +104,34 @@ ipcMain.handle('get-shop-conv', async (event, payload) => {
   return { code: -1, message: '' };
 });
 
-ipcMain.handle('add-shop', async (event, payload) => {
-  const { cookies, shopUid } = payload;
+ipcMain.handle('get-shopes', async () => {
+  try {
+    const data = db.getShopes();
+
+    if (data && data.length > 0) {
+      data.forEach(shop => {
+        httpSpider.setCookie(shop.shopUid, shop.cookies);
+      });
+    }
+
+    return { code: 0, data };
+  } catch (e) {
+    return { code: -1 };
+  }
+});
+
+ipcMain.handle('delete-shope', async (event, shopUid) => {
+  try {
+    wsSpider.closeWs({ shopUid });
+    db.deleteShop({ shopUid });
+    return { code: 0 };
+  } catch (e) {
+    return { code: -1 };
+  }
+});
+
+ipcMain.handle('update-shop', async (event, payload) => {
+  const { cookies, shopUid, shopUidStatus } = payload;
   httpSpider.setCookie(shopUid, cookies);
 
   try {
@@ -124,7 +153,7 @@ ipcMain.handle('add-shop', async (event, payload) => {
       SubToutiaoId
     } = entInfo.data;
 
-    db.addShop({
+    const shopData = {
       subToutiaoId: SubToutiaoId,
       shopUid,
       shopName: ShopName,
@@ -133,31 +162,73 @@ ipcMain.handle('add-shop', async (event, payload) => {
       shopId: ShopId,
       cookies,
       token: tokenData.data
-    });
+    };
+    if (shopUidStatus === 'create') {
+      db.addShop(shopData);
+      return { code: 0, message: '新建成功' };
+    }
+    if (shopUidStatus === 'update') {
+      db.updateShop(shopData);
+      return { code: 0, message: '更新成功' };
+    }
   } catch (e) {
-    return { code: -1, message: '添加失败' };
+    return { code: -1, message: '操作失败' };
   }
-  return { code: 0, message: '添加成功' };
+  return { code: -1, message: '操作失败' };
 });
 
 ipcMain.handle('shop-ws-connect', async (event, payload) => {
   const { shopUid } = payload;
-
-  wsSpider.connect({
-    shopUid,
-    success: () => {
-      return { code: 0, message: '连接成功' };
-    },
-    onMessage: () => {
-      // 发送新消息
-      ipcMain.handleOnce('new-message', {});
-
-      // 结束对话
-      ipcMain.handleOnce('end-conv', {});
-    }
-  });
+  const handleWsConnet = () =>
+    new Promise(resolve => {
+      wsSpider.connect({
+        shopUid,
+        success: () => {
+          resolve({ code: 0, message: '连接成功' });
+        },
+        onMessage: data => {
+          // 发送新消息
+          mainWindow.webContents.send('new-message', data);
+        }
+      });
+    });
+  const data = await handleWsConnet();
+  return data;
 });
 
 ipcMain.handle('shop-send-message', async (event, payload) => {
   wsSpider.sendMessage(payload);
+});
+
+ipcMain.handle('check-shopes', async () => {
+  const shopes = db.getShopes();
+  try {
+    if (shopes.length > 0) {
+      const res = await Promise.all(
+        shopes.map(shop => {
+          return httpSpider.get({
+            shopUid: shop.shopUid,
+            url: 'https://pigeon.jinritemai.com/backstage/currentuser'
+          });
+        })
+      );
+      // 判断检测状态
+      const successShopes = [];
+      shopes.forEach((shop, index) => {
+        if (res[index].data) {
+          successShopes.push(shop);
+        }
+      });
+      return { code: 0, data: successShopes };
+    }
+  } catch (e) {
+    return { code: -1, message: '检测失败' };
+  }
+  return { code: -1, message: '检测失败' };
+});
+
+ipcMain.handle('get-ws-connect-shop', async () => {
+  const data = wsSpider.getClientShop();
+  const arr = Object.keys(data);
+  return { code: 0, data: arr };
 });
