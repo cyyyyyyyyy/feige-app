@@ -46,6 +46,7 @@ const Setting = ({ data }) => {
     {
       title: '连接状态',
       dataIndex: 'connectStatus',
+      key: 'connectStatus',
       width: 120,
       render(val) {
         return val ? (
@@ -57,7 +58,8 @@ const Setting = ({ data }) => {
     },
     {
       title: '名称',
-      dataIndex: 'shopName'
+      dataIndex: 'shopName',
+      key: 'shopName'
     },
     {
       title: '操作',
@@ -67,7 +69,11 @@ const Setting = ({ data }) => {
           <div>
             <a onClick={() => handleDeleteShop(item.shopUid)}>删除</a>
             {!item.onlineStatus ? (
-              <a onClick={() => openUpdataModal(item.shopUid)}>重新登录</a>
+              <a
+                style={{ marginLeft: 8 }}
+                onClick={() => openUpdataModal(item.shopUid)}>
+                重新登录
+              </a>
             ) : null}
           </div>
         );
@@ -88,7 +94,6 @@ const Setting = ({ data }) => {
           编辑自动回复话术
         </Button>
         <Button
-          o
           style={{ marginLeft: 8 }}
           onClick={handleConnetShop}
           type="primary">

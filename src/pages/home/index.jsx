@@ -4,6 +4,7 @@ import { v4 } from 'uuid';
 
 import Convs from '../convs';
 import Setting from '../setting';
+import Backend from '../backend';
 import useSocket from './useSocket';
 
 import style from './index.less';
@@ -23,12 +24,49 @@ const Home = () => {
   const [shopUid, setShopUid] = useState({});
   const [shopUidStatus, setShopUidStatus] = useState('');
   const [quickReply, setQuickReply] = useState({});
-  const { newConnectShop, handleConnetShop } = useSocket(
+  const [notifShopes, setNotifShopes] = useState([]);
+  const [selectShop, setSelectShop] = useState({});
+  const [type, setType] = useState('1');
+
+  useEffect(() => {
+    if (shopes.length > 0 && !selectShop.shopUid) {
+      setSelectShop(shopes[0]);
+    }
+  }, [shopes]);
+
+  // 选择店铺
+  const handleSelectShop = shop => {
+    setSelectShop(shop);
+  };
+
+  // 新增提醒消息
+  const handleAddNotifShop = shop => {
+    if (notifShopes.indexOf(shop) === -1) {
+      setNotifShopes([...notifShopes, shop]);
+    }
+  };
+
+  // 删除提醒消息
+  const handleDelNotifShop = shop => {
+    setNotifShopes(notifShopes.filter(val => val !== shop));
+  };
+
+  // 点击提醒消息
+  const handleClickNotif = shop => {
+    setType('2');
+    handleSelectShop(shop);
+  };
+
+  const { newConnectShop, handleConnetShop } = useSocket({
     onlineShopes,
     connectShop,
-    quickReply
-  );
-  const [type, setType] = useState('1');
+    quickReply,
+    handleAddNotifShop,
+    selectShop,
+    shopes,
+    handleClickNotif,
+    type
+  });
 
   const openCreateModal = () => {
     setShopUid(v4());
@@ -136,7 +174,8 @@ const Home = () => {
       setConnectShop(filter);
     });
     return () => {
-      ipcRenderer.removeAllListeners(['socket-error', 'socket-close']);
+      ipcRenderer.removeAllListeners('socket-error');
+      ipcRenderer.removeAllListeners('socket-close');
     };
   }, [connectShop]);
 
@@ -169,12 +208,29 @@ const Home = () => {
     shopes,
     connectShop: [...connectShop, ...newConnectShop],
     onlineShopes,
+    notifShopes,
+    selectShop,
     openUpdataModal,
     openCreateModal,
     quickReply,
     handleUpdateQuickReply,
     handleDeleteShop,
-    handleConnetShop
+    handleConnetShop,
+    handleDelNotifShop,
+    handleSelectShop
+  };
+
+  const renderType = () => {
+    if (type === '1') {
+      return <Setting data={propsData} />;
+    }
+    if (type === '2') {
+      return <Convs data={propsData} />;
+    }
+    if (type === '3') {
+      return <Backend data={propsData} />;
+    }
+    return null;
   };
 
   return (
@@ -187,18 +243,15 @@ const Home = () => {
           onSelect={({ key }) => {
             setType(key);
           }}
-          defaultSelectedKeys={[type]}
+          selectedKeys={[type]}
           style={{ flex: '1 1 auto' }}>
           <Menu.Item key="1">监控</Menu.Item>
           <Menu.Item key="2">对话</Menu.Item>
+          <Menu.Item key="3">后台</Menu.Item>
         </Menu>
       </Header>
       <Content>
-        {type === '1' ? (
-          <Setting data={propsData} />
-        ) : (
-          <Convs data={propsData} />
-        )}
+        {renderType()}
         <Modal
           width={1200}
           visible={visible}

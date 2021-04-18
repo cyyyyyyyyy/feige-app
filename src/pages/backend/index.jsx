@@ -5,7 +5,7 @@ import style from './index.less';
 
 const { Content, Sider } = Layout;
 
-const Conv = React.forwardRef(({ data }, ref) => {
+const Backend = React.forwardRef(({ data }, ref) => {
   const {
     onlineShopes,
     connectShop,
@@ -84,7 +84,7 @@ const Conv = React.forwardRef(({ data }, ref) => {
             useragent="Mozilla/5.0 (Macintosh; Intel Mac OS X 11_1_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.90 Safari/537.36"
             partition={`persist:${selectShop.shopUid}`}
             style={{ height: '100%', width: '100%' }}
-            src="https://im.jinritemai.com/pc_seller/main/chat"
+            src="https://fxg.jinritemai.com/ffa/mshop/homepage/index"
           />
         </Content>
       </Layout>
@@ -92,4 +92,4 @@ const Conv = React.forwardRef(({ data }, ref) => {
   );
 });
 
-export default Conv;
+export default Backend;

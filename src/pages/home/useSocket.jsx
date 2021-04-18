@@ -4,7 +4,16 @@ const { ipcRenderer } = window.require('electron');
 
 const timer = {};
 
-const useSocket = (onlineShopes, connectShop, quickReply) => {
+const useSocket = ({
+  onlineShopes,
+  connectShop,
+  quickReply,
+  handleAddNotifShop,
+  selectShop,
+  shopes,
+  handleClickNotif,
+  type
+}) => {
   const [newConnectShop, setNewConnectShop] = useState([]);
 
   const handleSendMessage = ({ shopUid, id }) => {
@@ -19,11 +28,26 @@ const useSocket = (onlineShopes, connectShop, quickReply) => {
     const { autoMsgTime } = quickReply;
     if (autoMsgTime) {
       ipcRenderer.on('new-message', (event, arg) => {
-        const { customerId, shopUid, receiverId, role } = arg;
+        const { customerId, shopUid, receiverId, role, content } = arg;
         clearTimeout(timer[receiverId]);
         timer[receiverId] = null;
 
         if (customerId && role !== '2') {
+          if (shopUid !== selectShop.shopUid || type !== '2') {
+            const shop = shopes.find(val => val.shopUid === shopUid);
+            const notif = new Notification(`${shop.shopName}`, {
+              body: content
+            });
+            notif.onclick = () => {
+              handleClickNotif(shop);
+              ipcRenderer.invoke('show-app');
+            };
+          }
+
+          if (shopUid !== selectShop.shopUid) {
+            handleAddNotifShop(shopUid);
+          }
+
           if (!timer[customerId]) {
             timer[customerId] = setTimeout(() => {
               handleSendMessage({ shopUid, id: customerId });
@@ -36,14 +60,14 @@ const useSocket = (onlineShopes, connectShop, quickReply) => {
     return () => {
       ipcRenderer.removeAllListeners(['new-message']);
     };
-  }, [quickReply, timer]);
+  }, [quickReply, timer, selectShop]);
 
   const handleConnetShop = () => {
-    const shopes = onlineShopes.filter(
+    const filtershopes = onlineShopes.filter(
       val => connectShop.indexOf(val.shopUid) === -1
     );
 
-    const shopesPromise = shopes.map(({ shopUid }) => {
+    const shopesPromise = filtershopes.map(({ shopUid }) => {
       return ipcRenderer.invoke('shop-ws-connect', {
         shopUid
       });

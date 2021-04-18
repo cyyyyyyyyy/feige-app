@@ -238,3 +238,8 @@ ipcMain.handle('get-ws-connect-shop', async () => {
   const arr = Object.keys(data);
   return { code: 0, data: arr };
 });
+
+ipcMain.handle('show-app', () => {
+  mainWindow.show();
+  return null;
+});
